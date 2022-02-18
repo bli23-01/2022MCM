@@ -14,6 +14,9 @@ class Road:
         self.road_length = math.sqrt(self.project_length ** 2 + 
                                     self.height ** 2)
         self.theta = math.atan(self.height / self.project_length)
+    def get_dir_vec_norm(self):
+        v = self.end_point - self.start_point
+        return v / np.sqrt(np.sum(v**2))
 
 class Rider:
     def __init__(self, gender = True):
@@ -21,24 +24,31 @@ class Rider:
         self.velocity = 2
         self.cur_road = 0 #the index of roads
         self.cur_point = roads[self.cur_road].start_point
-    def update(self, rate = 1):    # 1s
-        print("update")
-        self.cur_road = (self.cur_road + 1) % len(roads)
-        self.cur_point = roads[self.cur_road].start_point
+        self.cur_dist = 0
+    def dist(self,target):
+        return np.sum((self.cur_point - target)**2, axis=1, keepdims=True)**0.5
+    def update(self, rate = 10):    # 1s
+        ramain_dis = self.velocity * rate
+        while self.cur_dist + ramain_dis > roads[self.cur_road].road_length:
+            ramain_dis -= roads[self.cur_road].road_length
+            self.cur_road = (self.cur_road + 1) % len(roads)
+            self.cur_dist = 0
+            self.cur_point = roads[self.cur_road].start_point
+        self.cur_dist += self.velocity * rate
+        self.cur_point += self.velocity * rate * roads[self.cur_road].get_dir_vec_norm()
         return self.cur_point
         
 def update(i):
     #ax.scatter3D(coods[:, 0],coods[:, 1], coods[:, 2], cmap='Blues')  #绘制散点图
     #plt.clear()
-    ax.plot3D(coods[:, 0],coods[:, 1], coods[:, 2], 'gray')
+    #ax.plot3D(coods[:, 0],coods[:, 1], coods[:, 2], 'gray')
     riders_points = []
     for rider in riders:
         riders_points.append(rider.update())
     riders_points = np.array(riders_points)
-    ax.scatter3D(riders_points[:, 0], riders_points[:, 1], riders_points[:, 2], cmap='Blues')
+    ax.scatter3D(riders_points[:, 0], riders_points[:, 1], riders_points[:, 2], 'red')
 
-    
-if __name__ == '__main__':
+def get_data():
     f = open("data.csv", "r")
     s = f.read()
     coodStrs = s.split(" ")
@@ -49,6 +59,12 @@ if __name__ == '__main__':
         t[0] = (t[0] - zero_cood[0]) / 0.00001141
         t[1] = (t[1] - zero_cood[1]) / 0.00000899
         coods.append(t)
+    f.close()
+    return np.array(coods)
+        
+if __name__ == '__main__':
+
+    coods = get_data()
 
     global roads
     roads = []
@@ -70,7 +86,9 @@ if __name__ == '__main__':
     riders = [Rider()]
 
     ax.plot3D(coods[:, 0],coods[:, 1], coods[:, 2], 'gray')
-    anim = FuncAnimation(fig, update, frames=np.arange(0, 10), interval=1)
+    cur_time = 0
+    while cur_time < 10000:
+        update(0)
+        plt.pause(0.01)
+#    anim = FuncAnimation(fig, update, frames=np.arange(0, 10), interval=1)
     plt.show()
-
-    f.close()
