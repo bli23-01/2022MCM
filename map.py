@@ -1,5 +1,4 @@
 import code
-import imp
 import math
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import MultipleLocator
@@ -43,3 +42,8 @@ class road:
         self.road_length = math.sqrt(self.project_length ** 2 + 
                                     self.height ** 2)
         self.theta = math.atan(self.height / self.project_length)
+
+class rider:
+    def __init__(self, gender):
+        self.gender = gender
+
