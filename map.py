@@ -4,7 +4,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-class road:
+class Road:
     def __init__(self, start_point, end_point):
         self.start_point = start_point #标准化之后的点信息
         self.end_point = end_point
@@ -15,9 +15,11 @@ class road:
                                     self.height ** 2)
         self.theta = math.atan(self.height / self.project_length)
 
-class rider:
+class Rider:
     def __init__(self, gender):
         self.gender = gender
+        self.velocity = 0
+        
 if __name__ == '__main__':
     f = open("data.csv", "r")
     s = f.read()
@@ -28,9 +30,12 @@ if __name__ == '__main__':
         t = list(map(float,s1.split(",")))
         t[0] = (t[0] - zero_cood[0]) / 0.00001141
         t[1] = (t[1] - zero_cood[1]) / 0.00000899
-
         coods.append(t)
-    print(coods)
+
+    roads = []
+    for i in range(0, len(coods)):
+        roads.append(Road(coods[i], coods[(i + 1) % len(coods)]))
+        print(roads[i].road_length)
 
     coods = np.array(coods)
     fig = plt.figure()
