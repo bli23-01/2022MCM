@@ -16,10 +16,28 @@ class Road:
         self.theta = math.atan(self.height / self.project_length)
 
 class Rider:
-    def __init__(self, gender):
+    def __init__(self, gender = True):
         self.gender = gender
-        self.velocity = 0
+        self.velocity = 2
+        self.cur_road = 0 #the index of roads
+        self.cur_point = roads[self.cur_road].start_point
+    def update(self, rate = 1):    # 1s
+        print("update")
+        self.cur_road = (self.cur_road + 1) % len(roads)
+        self.cur_point = roads[self.cur_road].start_point
+        return self.cur_point
         
+def update(i):
+    #ax.scatter3D(coods[:, 0],coods[:, 1], coods[:, 2], cmap='Blues')  #绘制散点图
+    #plt.clear()
+    ax.plot3D(coods[:, 0],coods[:, 1], coods[:, 2], 'gray')
+    riders_points = []
+    for rider in riders:
+        riders_points.append(rider.update())
+    riders_points = np.array(riders_points)
+    ax.scatter3D(riders_points[:, 0], riders_points[:, 1], riders_points[:, 2], cmap='Blues')
+
+    
 if __name__ == '__main__':
     f = open("data.csv", "r")
     s = f.read()
@@ -32,22 +50,27 @@ if __name__ == '__main__':
         t[1] = (t[1] - zero_cood[1]) / 0.00000899
         coods.append(t)
 
+    global roads
     roads = []
+
     for i in range(0, len(coods)):
         roads.append(Road(coods[i], coods[(i + 1) % len(coods)]))
         print(roads[i].road_length)
 
     coods = np.array(coods)
     fig = plt.figure()
-    ax1 = plt.axes(projection='3d')
+    ax = plt.axes(projection='3d')
 
     plt.axis('auto')
-    ax1.set_xlim([-3000,2000])
-    ax1.set_ylim([-4000,1000])
-    ax1.set_zlim([0,1000])
+    ax.set_xlim([-3000,2000])
+    ax.set_ylim([-4000,1000])
+    ax.set_zlim([0,1000])
 
-    ax1.scatter3D(coods[:, 0],coods[:, 1], coods[:, 2], cmap='Blues')  #绘制散点图
-    ax1.plot3D(coods[:, 0],coods[:, 1], coods[:, 2], 'gray') 
+    global riders 
+    riders = [Rider()]
+
+    ax.plot3D(coods[:, 0],coods[:, 1], coods[:, 2], 'gray')
+    anim = FuncAnimation(fig, update, frames=np.arange(0, 10), interval=1)
     plt.show()
 
     f.close()
