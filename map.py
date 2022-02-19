@@ -1,8 +1,7 @@
-from dis import dis
 import math
 import numpy as np
 from matplotlib import pyplot as plt
-import datetime
+from matplotlib.animation import FuncAnimation
 
 class Road:
     def __init__(self, start_point, end_point):
@@ -41,34 +40,24 @@ class Road:
             curRoad.rho = (rho_start + rho_end) / 2
 
 class Rider:
-    def __init__(self, name = "default", gender = True):
-        self.name = name
+    def __init__(self, gender = True):
         self.gender = gender
         self.velocity = 10
         self.cur_road = 0 #the index of roads
         self.cur_point = roads[self.cur_road].start_point
         self.cur_dist = 0
-        self.total_dist = 0
-        self.time = 0
-        self.finished = False
     def dist(self,target):
         return np.sum((self.cur_point - target)**2, axis=1, keepdims=True)**0.5
     def update(self, rate = 1):    # 1s
-        if self.finished:
-            return
         ramain_dis = self.velocity * rate
         while self.cur_dist + ramain_dis > roads[self.cur_road].road_length:
             ramain_dis -= roads[self.cur_road].road_length
-            if self.cur_road == len(roads) - 1:
-                self.finished = True
             self.cur_road = (self.cur_road + 1) % len(roads)
-            self.total_dist += self.cur_dist
             self.cur_dist = 0
             self.cur_point = roads[self.cur_road].start_point
         self.cur_dist += self.velocity * rate
         self.cur_point += self.velocity * rate * roads[self.cur_road].get_dir_vec_norm()
-        self.time += 1
-        return self.cur_point, self.cur_dist + self.total_dist
+        return self.cur_point
 
 
 
@@ -76,26 +65,14 @@ class Rider:
 def update(i):
     #ax.scatter3D(coods[:, 0],coods[:, 1], coods[:, 2], cmap='Blues')  #绘制散点图
     #plt.clear()
-    ax.cla()
+    plt.cla()
     ax.set_xlim([-3000,2000])
     ax.set_ylim([-4000,1000])
     ax.set_zlim([0,1000])
     ax.plot3D(coods[:, 0],coods[:, 1], coods[:, 2], 'gray')
     riders_points = []
-    count = 0
     for rider in riders:
-        point, dist = rider.update()
-        riders_points.append(point)
-        time_x.append(rider.time)
-        dist_lists[count].append(dist)
-        velocity_lists[count].append(rider.velocity)
-        ax2.plot(time_x, dist_lists[count], 'r')
-        ax3.plot(time_x, velocity_lists[count], 'r')
-        ax.text(1000, -3500, 2000 - count * 100, rider.name + ": " +str(datetime.timedelta(seconds=rider.time)))
-        count += 1
-
-    if len(riders_points) == 0:
-        return
+        riders_points.append(rider.update())
     riders_points = np.array(riders_points)
     ax.scatter3D(riders_points[:, 0], riders_points[:, 1], riders_points[:, 2], 'red')
 
@@ -127,29 +104,21 @@ if __name__ == '__main__':
         print(roads[i].project_length,roads[i].rho)
 
     coods = np.array(coods)
-    fig = plt.figure(figsize=(800, 800))
-    ax = fig.add_subplot(1, 3, 1, projection='3d')
-    ax2 = fig.add_subplot(1, 3, 2)
-    ax3 = fig.add_subplot(1, 3, 3)
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
 
     plt.axis('auto')
     ax.set_xlim([-3000,2000])
     ax.set_ylim([-4000,1000])
     ax.set_zlim([0,1000])
 
-    global riders
+    global riders 
     riders = [Rider()]
-    dist_lists = []
-    velocity_lists = []
-    time_x = []
-    for i in range(len(riders)):
-        dist_lists.append([])
-        velocity_lists.append([])
 
     ax.plot3D(coods[:, 0],coods[:, 1], coods[:, 2], 'gray')
     cur_time = 0
     while cur_time < 10000:
         update(0)
         plt.pause(0.001)
-#   # anim = FuncAnimation(fig, update, frames=np.arange(0, 10), interval=1)
+#    anim = FuncAnimation(fig, update, frames=np.arange(0, 10), interval=1)
     plt.show()
