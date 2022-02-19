@@ -1,7 +1,7 @@
 import math
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib import cm
+from matplotlib.animation import FuncAnimation
 
 class Road:
     def __init__(self, start_point, end_point):
@@ -50,38 +50,31 @@ def update(i):
         riders_points.append(rider.update())
     riders_points = np.array(riders_points)
     ax.scatter3D(riders_points[:, 0], riders_points[:, 1], riders_points[:, 2], 'red')
-    surf = ax.plot_surface(curve[:, 0], curve[:, 1], curve[:, 2], cmap=cm.coolwarm, linewidth=0, antialiased=False)
-    fig.colorbar(surf, shrink=0.5, aspect=5)
 
 def get_data():
     f = open("data.csv", "r")
     s = f.read()
     coodStrs = s.split(" ")
     coods = []
-    curve = []
     zero_cood = list(map(float,coodStrs[0].split(",")))
     for s1 in coodStrs:
         t = list(map(float,s1.split(",")))
         t[0] = (t[0] - zero_cood[0]) / 0.00001141
         t[1] = (t[1] - zero_cood[1]) / 0.00000899
         coods.append(t)
-        curve.append(t)
-        curve.append([t[0], t[1], 0])
     f.close()
-    return np.array(coods), np.array(curve)
+    return np.array(coods)
         
 if __name__ == '__main__':
 
-    coods, curve = get_data()
-    print(np.shape(curve))
+    coods = get_data()
 
     global roads
     roads = []
-    
 
     for i in range(0, len(coods)):
         roads.append(Road(coods[i], coods[(i + 1) % len(coods)]))
-        #print(roads[i].road_length)
+        print(roads[i].road_length)
 
     coods = np.array(coods)
     fig = plt.figure()
@@ -97,10 +90,8 @@ if __name__ == '__main__':
 
     ax.plot3D(coods[:, 0],coods[:, 1], coods[:, 2], 'gray')
     cur_time = 0
-    surf = ax.plot_surface(curve[:, 0], curve[:, 1], curve[:, 2], cmap=cm.coolwarm, linewidth=0, antialiased=False)
-    fig.colorbar(surf, shrink=0.5, aspect=5)
-    #while cur_time < 10000:
-    #    update(0)
-    #    plt.pause(0.001)
+    while cur_time < 10000:
+        update(0)
+        plt.pause(0.001)
 #    anim = FuncAnimation(fig, update, frames=np.arange(0, 10), interval=1)
     plt.show()
