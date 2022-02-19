@@ -13,9 +13,31 @@ class Road:
         self.road_length = math.sqrt(self.project_length ** 2 + 
                                     self.height ** 2)
         self.theta = math.atan(self.height / self.project_length)
+        self.rho = 0
     def get_dir_vec_norm(self):
         v = self.end_point - self.start_point
         return v / np.sqrt(np.sum(v**2))
+    @staticmethod
+    def getRho(point1,point2,point3):
+        a = math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
+        b = math.sqrt((point1[0] - point3[0]) ** 2 + (point1[1] - point3[1]) ** 2)
+        c = math.sqrt((point3[0] - point2[0]) ** 2 + (point3[1] - point2[1]) ** 2)
+        cosA = math.sqrt(1 - ((b * b + c * c - a * a) / (2 * b * c)) ** 2)
+        if cosA <= 0:
+            return math.inf
+        return a / (2 * cosA)
+    @staticmethod
+    def calcRho(roads):
+        n = len(roads)
+        for i in range(n):
+            curRoad = roads[i]
+            prevRoad = roads[(i - 1) % n]
+            nextRoad = roads[(i + 1) % n]
+            prevPoint = prevRoad.start_point
+            nextPoint = nextRoad.end_point
+            rho_start = Road.getRho(prevPoint,curRoad.start_point,nextPoint)
+            rho_end = Road.getRho(prevPoint,curRoad.end_point,nextPoint)
+            curRoad.rho = (rho_start + rho_end) / 2
 
 class Rider:
     def __init__(self, gender = True):
@@ -36,7 +58,10 @@ class Rider:
         self.cur_dist += self.velocity * rate
         self.cur_point += self.velocity * rate * roads[self.cur_road].get_dir_vec_norm()
         return self.cur_point
-        
+
+
+
+
 def update(i):
     #ax.scatter3D(coods[:, 0],coods[:, 1], coods[:, 2], cmap='Blues')  #绘制散点图
     #plt.clear()
@@ -74,7 +99,9 @@ if __name__ == '__main__':
 
     for i in range(0, len(coods)):
         roads.append(Road(coods[i], coods[(i + 1) % len(coods)]))
-        print(roads[i].road_length)
+    Road.calcRho(roads)
+    for i in range(0,len(roads)):
+        print(roads[i].project_length,roads[i].rho)
 
     coods = np.array(coods)
     fig = plt.figure()
