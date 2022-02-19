@@ -77,7 +77,7 @@ def update(i):
     ax.scatter3D(riders_points[:, 0], riders_points[:, 1], riders_points[:, 2], 'red')
 
 def get_data():
-    f = open("data.csv", "r")
+    f = open("Fuji.csv", "r")
     s = f.read()
     coodStrs = s.split(" ")
     coods = []
