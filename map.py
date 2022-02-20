@@ -112,7 +112,17 @@ def get_data():
         coods.append(t)
     f.close()
     return np.array(coods)
-        
+
+def get_roads():
+    coods = get_data()
+
+    roads = []
+
+    for i in range(0, len(coods)):
+        roads.append(Road(coods[i], coods[(i + 1) % len(coods)]))
+    Road.calcRho(roads)
+    return roads
+
 if __name__ == '__main__':
 
     coods = get_data()
