@@ -31,10 +31,10 @@ def dp(roads,k_wheel, C_d, rho_air, area, M, mu, theta, F_b,k_f,k_r,k_i,p_max0):
         else:
             total_dis.append(total_dis[len(total_dis)-1] + road.road_length)
 
+    print(total_dis[len(total_dis)-1])
 
-
-    nx,nv,ns,ne = 100,30,10,10
-    dx,dv,ds,de = 100,0.5,150,1000
+    nx,nv,ns,ne = 424,30,10,10
+    dx,dv,ds,de = 50,0.5,150,1000
     max_x_n = 3
     delta_p = 10
     dp = np.ones((nx,nv,ns,ne)) * 100000
@@ -42,6 +42,8 @@ def dp(roads,k_wheel, C_d, rho_air, area, M, mu, theta, F_b,k_f,k_r,k_i,p_max0):
     dp[0,0:10,ns-1,ne-1] = 0
 
     p_x = np.zeros((nx))
+    v_x = np.zeros((nx))
+
     for x_i in range(1,nx):
         res = 100000
         for x_j in range(x_i - max_x_n,x_i):
@@ -95,6 +97,8 @@ def dp(roads,k_wheel, C_d, rho_air, area, M, mu, theta, F_b,k_f,k_r,k_i,p_max0):
         p_i = dicision[x,v,s,e,4]
         for x_j in range(x_i,x+1):
             p_x[x_j] = p_i
+        for x_j in range(x_i,x+1):
+            v_x[x_j] = v_i
         x,v,s,e = x_i,v_i,s_i,e_i
     print(p_x)
     plt.plot(np.arange(0,nx*dx,dx),p_x)
