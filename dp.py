@@ -1,21 +1,30 @@
 import math
 import numpy as np
 from map import Road
+import matplotlib.pyplot as plt
 
 def newton(p_rider, velocity, k_wheel, C_d, rho_air, area, M, mu, theta, F_b):
     return (k_wheel * p_rider / velocity - 1 / 2 * C_d * rho_air * area * (velocity ** 2) - M * 9.8 *(mu * math.cos(theta) + math.sin(theta)) - F_b) / M
 
 def get_index(x,delta_x):
     return int(x / delta_x)
+
+
 def dp(roads,k_wheel, C_d, rho_air, area, M, mu, theta, F_b,k_f,k_r,k_i,p_max0):
-    nx,nv,ns,ne = 10,40,10,10
-    dx,dv,ds,de = 100,0.5,100,1000
-    max_x_n = 10
+    
+    for road in roads:
+        pass
+
+
+
+    nx,nv,ns,ne = 100,30,10,10
+    dx,dv,ds,de = 40,0.5,100,1000
+    max_x_n = 3
     delta_p = 10
     dp = np.ones((nx,nv,ns,ne)) * 100000
-    dicision = [np.zeros((nx,nv,ns,ne)),np.zeros((nx,nv,ns,ne)),np.zeros((nx,nv,ns,ne)),np.zeros((nx,nv,ns,ne))]
-    dp[0,:,ns-1,ne-1] = 0
-    #print(dp
+    dicision = np.zeros((nx,nv,ns,ne,5))
+    dp[0,0:10,ns-1,ne-1] = 0
+
     p_x = np.zeros((nx))
     for x_i in range(1,nx):
         res = 100000
@@ -36,16 +45,29 @@ def dp(roads,k_wheel, C_d, rho_air, area, M, mu, theta, F_b,k_f,k_r,k_i,p_max0):
                                 if v_i < nv and s_i < ns and e_i < ne and v_i > 0 and s_i > 0 and e_i > 0:
                                     if dp[x_j,v_j,s_j,e_j] + dt < dp[x_i,v_i,s_i,e_i]:
                                         dp[x_i,v_i,s_i,e_i] = dp[x_j,v_j,s_j,e_j] + dt
-                                        dicision[0][x_i,v_i,s_i,e_i] = x_j
-                                        dicision[1][x_i,v_i,s_i,e_i] = v_j
-                                        dicision[2][x_i,v_i,s_i,e_i] = s_j
-                                        dicision[3][x_i,v_i,s_i,e_i] = e_j
+                                        dicision[x_i,v_i,s_i,e_i] = x_j,v_j,s_j,e_j,p_rider
                                         #print(x_j,v_j,s_j,e_j,dp[x_j,v_j,s_j,e_j] + dt)
                                         #print(x_i,v_i,s_i,e_i,dp[x_i,v_i,s_i,e_i])
                                         res = min(res,dp[x_i,v_i,s_i,e_i])
         print(x_i,res)
-        
+    ans = 100000
+    x,v,s,e = nx-1,0,0,0
+    for v_i in range(1,nv):
+        for s_i in range(ns):
+            for e_i in range(ne):
+                if dp[nx-1,v_i,s_i,e_i] < ans:
+                    ans = dp[nx-1,v_i,s_i,e_i]
+                    v,s,e = v_i,s_i,e_i
+    while x > 0:
+        x_i,v_i,s_i,e_i,p_i = map(int,dicision[x,v,s,e])
+        p_i = dicision[x,v,s,e,4]
+        for x_j in range(x_i,x+1):
+            p_x[x_j] = p_i
+        x,v,s,e = x_i,v_i,s_i,e_i
+    print(p_x)
+    plt.plot(np.arange(0,nx*dx,dx),p_x)
+    plt.show()
     return dp
 
 if __name__ == '__main__':
-    dp(0,k_wheel=1,C_d=0.05,rho_air=1.1,area=0.35,M=60,mu=0.2,theta=0,F_b=0,k_f=0.036,k_r=0.0124,k_i=0.556,p_max0=1150)
+    dp(0,k_wheel=1,C_d=0.05,rho_air=1.1,area=0.35,M=60,mu=0.003,theta=0.001,F_b=0,k_f=0.036,k_r=0.0124,k_i=0.556,p_max0=1150)
