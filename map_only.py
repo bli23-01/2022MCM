@@ -1,4 +1,3 @@
-from dis import dis
 import math
 import numpy as np
 from matplotlib import pyplot as plt
@@ -23,6 +22,7 @@ class Road:
         a = math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
         b = math.sqrt((point1[0] - point3[0]) ** 2 + (point1[1] - point3[1]) ** 2)
         c = math.sqrt((point3[0] - point2[0]) ** 2 + (point3[1] - point2[1]) ** 2)
+        print(point2,point3)
         cosA = math.sqrt(1 - ((b * b + c * c - a * a) / (2 * b * c)) ** 2)
         if cosA <= 0:
             return math.inf
@@ -44,7 +44,7 @@ class Rider:
     def __init__(self, name = "default", gender = True):
         self.name = name
         self.gender = gender
-        self.velocity = 100
+        self.velocity = 0
         self.cur_road = 0 #the index of roads
         self.cur_point = roads[self.cur_road].start_point
         self.cur_dist = 0
@@ -77,15 +77,20 @@ def update(i):
     #ax.scatter3D(coods[:, 0],coods[:, 1], coods[:, 2], cmap='Blues')  #绘制散点图
     #plt.clear()
     ax.cla()
-    if file_name == "Fuji.csv":
+    if file_name == "Fuji.csv" or file_name == "data.csv":
         ax.set_xlim([-3000,2000])
         ax.set_ylim([-4000,1000])
         ax.set_zlim([0,1000])
     elif file_name == "uci.csv":
-        ax.set_xlim([-14000,10000])
-        ax.set_ylim([-20000,3000])
-        ax.set_zlim([0,1000])
-    ax.plot3D(coods[:, 0],coods[:, 1], coods[:, 2], 'gray')
+        ax.set_xlim([-10000,7000])
+        ax.set_ylim([-16000,1000])
+        ax.set_zlim([-500,500])
+    elif file_name == "yjh.csv":
+        ax.set_xlim([-1700,2300])
+        ax.set_ylim([0,4000])
+        ax.set_zlim([-500,500])
+    
+    ax.plot3D(coods[:, 0],coods[:, 1], coods[:, 2], 'green')
     riders_points = []
     count = 0
     for rider in riders:
@@ -96,10 +101,10 @@ def update(i):
         velocity_lists[count].append(rider.velocity)
         #ax2.plot(time_x, dist_lists[count], 'r')
         #ax3.plot(time_x, velocity_lists[count], 'r')
-        if file_name == "Fuji.csv":
-            ax.text(1000, -3500, 2000 - count * 100, rider.name + ": " + str(datetime.timedelta(seconds=rider.time)))
-        elif file_name == "uci.csv":
-            ax.text(0, 0, 100 - count * 10, rider.name + ": " + str(datetime.timedelta(seconds=rider.time)))
+        #if file_name == "Fuji.csv" or file_name == "data.csv":
+        #    ax.text(1000, -3500, 2000 - count * 100, rider.name + ": " + str(datetime.timedelta(seconds=rider.time)))
+        #elif file_name == "uci.csv":
+        #    ax.text(0, 0, 100 - count * 10, rider.name + ": " + str(datetime.timedelta(seconds=rider.time)))
         count += 1
 
     if len(riders_points) == 0:
@@ -123,16 +128,16 @@ def get_data(file_name = 'data.csv'):
         
 if __name__ == '__main__':
 
-    file_name = "uci.csv"
+    file_name = "yjh.csv"
     coods = get_data(file_name)
 
     global roads
     roads = []
 
-    for i in range(0, len(coods)):
+    for i in range(0, len(coods) - 1):
         roads.append(Road(coods[i], coods[(i + 1) % len(coods)]))
     Road.calcRho(roads)
-    for i in range(0,len(roads)):
+    for i in range(0,len(roads) - 1):
         print(roads[i].project_length,roads[i].rho,roads[i].theta)
 
     coods = np.array(coods)
@@ -140,7 +145,7 @@ if __name__ == '__main__':
     ax = fig.add_subplot(1, 1, 1, projection='3d')
 
     plt.axis('auto')
-    if file_name == "Fuji.csv":
+    if file_name == "Fuji.csv" or file_name == "data.csv":
         ax.set_xlim([-3000,2000])
         ax.set_ylim([-4000,1000])
         ax.set_zlim([0,1000])
@@ -148,6 +153,10 @@ if __name__ == '__main__':
         ax.set_xlim([-10000,10000])
         ax.set_ylim([-10000,10000])
         ax.set_zlim([0,100])
+    elif file_name == "yjh.csv":
+        ax.set_xlim([-3000,2000])
+        ax.set_ylim([0,4000])
+        ax.set_zlim([-500,500])
 
     global riders
     riders = [Rider()]
@@ -158,10 +167,9 @@ if __name__ == '__main__':
         dist_lists.append([])
         velocity_lists.append([])
 
-    ax.plot3D(coods[:, 0],coods[:, 1], coods[:, 2], 'gray')
+    ax.plot3D(coods[:, 0],coods[:, 1], coods[:, 2], 'green')
     cur_time = 0
     while cur_time < 10000:
         update(0)
         plt.pause(0.001)
-#   # anim = FuncAnimation(fig, update, frames=np.arange(0, 10), interval=1)
     plt.show()
