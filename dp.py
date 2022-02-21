@@ -33,8 +33,8 @@ def dp(roads,k_wheel, C_d, rho_air, area, M, mu, theta, F_b,k_f,k_r,k_i,p_max0):
 
     print(total_dis[len(total_dis)-1])
 
-    nx,nv,ns,ne = 424,30,10,10
-    dx,dv,ds,de = 50,0.5,150,1000
+    nx,nv,ns,ne = 639,40,10,10
+    dx,dv,ds,de = 100,0.5,130,8000
     max_x_n = 3
     delta_p = 10
     dp = np.ones((nx,nv,ns,ne)) * 100000
@@ -98,13 +98,22 @@ def dp(roads,k_wheel, C_d, rho_air, area, M, mu, theta, F_b,k_f,k_r,k_i,p_max0):
         for x_j in range(x_i,x+1):
             p_x[x_j] = p_i
         for x_j in range(x_i,x+1):
-            v_x[x_j] = v_i
+            v_x[x_j] = v_i * dv
         x,v,s,e = x_i,v_i,s_i,e_i
-    print(p_x)
-    plt.plot(np.arange(0,nx*dx,dx),p_x)
+    print(list(p_x))
+    print(list(v_x))
+    plt.plot(np.arange(0,nx*dx,dx),v_x)
     plt.show()
-    return dp
+    return p_x,v_x,dp
 
 if __name__ == '__main__':
     roads = get_roads()
-    dp(roads,k_wheel=1,C_d=0.05,rho_air=1.1,area=0.35,M=60,mu=0.003,theta=0.001,F_b=40,k_f=0.036,k_r=0.0124,k_i=0.556,p_max0=1150)
+    #dp(roads,k_wheel=1,C_d=0.05,rho_air=1.1,area=0.35,M=60,mu=0.003,theta=0.001,F_b=40,k_f=0.036,k_r=0.0124,k_i=0.556,p_max0=1150)
+    #dp(roads,k_wheel=1,C_d=0.05,rho_air=1.1,area=0.35,M=60,mu=0.003,theta=0.001,F_b=40,k_f=0.001,k_r=0.01078,k_i=0.5,p_max0=1300)
+
+
+    #dp(roads,k_wheel=1,C_d=0.05,rho_air=1.1,area=0.35,M=60,mu=0.003,theta=0.001,F_b=40,k_f=0.0416,k_r=0.0104,k_i=1.11,p_max0=1000)
+    #dp(roads,k_wheel=1,C_d=0.05,rho_air=1.1,area=0.35,M=60,mu=0.003,theta=0.001,F_b=40,k_f=0.018,k_r=0.00901,k_i=1.18,p_max0=900)
+    #dp(roads,k_wheel=1,C_d=0.05,rho_air=1.1,area=0.35,M=60,mu=0.003,theta=0.001,F_b=40,k_f=0.057,k_r=0.001078,k_i=0.5,p_max0=1500)
+    dp(roads,k_wheel=1,C_d=0.05,rho_air=1.1,area=0.35,M=60,mu=0.003,theta=0.001,F_b=40,k_f=0.0046,k_r=0.0009,k_i=0.53,p_max0=1300)
+
